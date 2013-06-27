@@ -11,6 +11,8 @@ ACTION=$1
 COMMAND=$2
 INTERVAL=$3 
 PID=''
+RETRY=3
+STAT=1
 
 if [ -z "$INTERVAL" ] ; then
   INTERVAL=1
@@ -22,9 +24,24 @@ start_process() {
     echo "Usage: $0 start <command>" >&2
     exit 1
   fi
-  $COMMAND &> $LOGFILE &
+  $COMMAND > $LOGFILE &
   PID=$!
-  echo $PID > $PIDFILE
+
+  sleep 1
+  PSLINE=$(ps $PID | wc -l)
+  if [ $PSLINE -eq 1 ]; then
+    RETRY=$(($RETRY - 1))
+    STAT=0
+  else
+    RETRY=3
+    STAT=1
+    echo $PID > $PIDFILE
+  fi
+
+  if [ $RETRY -lt 1 ]; then
+    echo some error occured
+    exit 1
+  fi
 }
 
 monitor() {
@@ -55,7 +72,7 @@ stop() {
 }
 
 start_monitor() {
-  (monitor &> $LOGMASTERFILE&  echo $! > $PIDMASTERFILE)
+  (monitor &> $LOGMASTERFILE&  [ $STAT -eq 1 ] && echo $! > $PIDMASTERFILE)
 }
 
 
