@@ -1,12 +1,24 @@
 #!/usr/bin/env bash
 
+# file        : daemon.sh
+# description : daemon process manager 
+# creator     : Tim
+# version     : 1.1
+
+# history
+# 2013-06-26    Tim    First release
+# 2013-06-27    Tim    Add retry
+# 2013-06-28    Tim    Add comment
+
 # constant
+
 LOGFILE="daemon.log"
 LOGMASTERFILE="daemon.master.log"
 PIDFILE="daemon.pid"
 PIDMASTERFILE="daemon.master.pid"
 
 # variables
+
 ACTION=$1
 COMMAND=$2
 INTERVAL=$3 
@@ -18,6 +30,7 @@ if [ -z "$INTERVAL" ] ; then
   INTERVAL=1
 fi
 
+# function
 
 start_process() {
   if [ -z "$COMMAND" ] ; then
@@ -75,6 +88,7 @@ start_monitor() {
   (monitor &> $LOGMASTERFILE&  [ $STAT -eq 1 ] && echo $! > $PIDMASTERFILE)
 }
 
+# main
 
 case $ACTION in
   start)
